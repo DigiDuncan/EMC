@@ -17,7 +17,7 @@ def getRequirements():
 
 
 def getVersion():
-    path = Path(__file__).parent.resolve() / "digiwof" / "__init__.py"
+    path = Path(__file__).parent.resolve() / "emc" / "__init__.py"
     with open(path, "r") as fp:
         version_file = fp.read()
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
@@ -28,26 +28,26 @@ def getVersion():
 
 
 setuptools.setup(
-    name="digiwof",
+    name="EMC",
     version=getVersion(),
     author="DigiDuncan",
     author_email="digiduncan@gmail.com",
-    description="Wheel of Fortune, DigiDuncan style.",
+    description="EMC Calculator",
     long_description=getLongDescription(),
     long_description_content_type="text/markdown",
-    url="https://github.com/DigiDuncan/DigiWOF",
-    python_requires=">=3.7",
+    url="https://github.com/DigiDuncan/EMC",
+    python_requires=">=3.9",
     install_requires=getRequirements(),
     packages=setuptools.find_packages(),
     include_package_data=True,
     classifiers=[
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.9",
         "Operating System :: OS Independent",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
     ],
     entry_points={
         "console_scripts": [
-            "digiwof=digiwof.main:main"
+            "emc=emc.main:main"
         ]
     }
 )
