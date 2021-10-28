@@ -24,25 +24,27 @@ class EMCRecipe:
         self.recipe = recipe
         self.shaped = shaped
 
+    @property
+    def value(self) -> int:
+        value = 0
+        for item in self.recipe:
+            if item is not None:
+                value += item.value
+        return value
+
 
 class EMCItem:
-    def __init__(self, name: str, value_or_recipe: Union[int, EMCRecipe]):
+    def __init__(self, name: str, *, value: int = None, recipe: Recipe = None):
         self.name = name
-        self._raw_value = None
-        self._recipe = None
-
-        if isinstance(value_or_recipe, int):
-            self._raw_value = value_or_recipe
-        elif isinstance(value_or_recipe, EMCRecipe):
-            self._recipe = value_or_recipe
+        self._raw_value = value
+        self._recipe = recipe
 
     @property
     def value(self):
         if self._raw_value:
             return self._raw_value
         elif self._recipe:
-            recipe = [i for i in self._recipe if i is not None]
-            return sum([i.value for i in recipe])
+            return self._recipe.value
 
 
 class EMCSystem:
