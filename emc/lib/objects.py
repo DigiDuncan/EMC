@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Union
 
+import fuzzywuzzy
+
 
 ShapedRecipe = tuple[Union["EMCItem", None], Union["EMCItem", None], Union["EMCItem", None],
                      Union["EMCItem", None], Union["EMCItem", None], Union["EMCItem", None],
@@ -50,6 +52,19 @@ class EMCItem:
 class EMCSystem:
     def __init__(self, name: str, items: list[EMCItem] = []):
         self._items = items
+
+    def add_item(self, item: EMCItem):
+        self._items.append(item)
+
+    def get_item(self, name: str):
+        for item in self._items:
+            if item.name == name:
+                return item
+        return None
+
+    def search(self, name: str):
+        names = [i.name for i in self._items]
+
 
 
 class EMCDB:
