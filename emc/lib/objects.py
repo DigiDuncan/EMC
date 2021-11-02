@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import Union
 
-import fuzzywuzzy
+import fuzzywuzzy.process
 
 
-ShapedRecipe = tuple[Union["EMCItem", None], Union["EMCItem", None], Union["EMCItem", None],
-                     Union["EMCItem", None], Union["EMCItem", None], Union["EMCItem", None],
-                     Union["EMCItem", None], Union["EMCItem", None], Union["EMCItem", None]]
-ShapelessRecipe = list["EMCItem"]
+ShapedRecipe = tuple[Union[str, None], Union[str, None], Union[str, None],
+                     Union[str, None], Union[str, None], Union[str, None],
+                     Union[str, None], Union[str, None], Union[str, None]]
+ShapelessRecipe = list[str]
 Recipe = Union[ShapedRecipe, ShapelessRecipe]
 
 
@@ -26,14 +26,6 @@ class EMCRecipe:
         self.recipe = recipe
         self.shaped = shaped
 
-    @property
-    def value(self) -> int:
-        value = 0
-        for item in self.recipe:
-            if item is not None:
-                value += item.value
-        return value
-
 
 class EMCItem:
     def __init__(self, name: str, *, value: int = None, recipe: Recipe = None):
@@ -45,8 +37,12 @@ class EMCItem:
     def value(self):
         if self._raw_value:
             return self._raw_value
-        elif self._recipe:
-            return self._recipe.value
+        else:
+            return None
+
+    @property
+    def composite(self):
+        return self._recipe is not None
 
 
 class EMCSystem:
@@ -56,15 +52,38 @@ class EMCSystem:
     def add_item(self, item: EMCItem):
         self._items.append(item)
 
+    def add_items(self, items: list[EMCItem]):
+        for item in items:
+            self.add_item(item)
+
+    def remove_item(self, name: str):
+        i = next((i for i in self._items if i.name == name), None)
+        if i:
+            self._items.remove(i)
+
     def get_item(self, name: str):
-        for item in self._items:
-            if item.name == name:
-                return item
-        return None
+        return next((i for i in self._items if i.name == name), None)
 
-    def search(self, name: str):
-        names = [i.name for i in self._items]
+    def search(self, name: str) -> Union[EMCItem, None]:
+        i = self.get_item(name)
+        if i:
+            return i
+        else:
+            search_item = fuzzywuzzy.process.extractOne(name, [i.name for i in self._items])[0]
+            if search_item:
+                return self.get_item(search_item)
+            else:
+                return None
 
+    def calculate_value(self, name: str) -> int:
+        if name is None:
+            return 0
+        item = self.get_item(name)
+        if item.composite:
+            recipe = [self.get_item(i) for i in item._recipe.recipe if i is not None]
+            return sum([self.calculate_value(i.name) for i in recipe])
+        else:
+            return item.value
 
 
 class EMCDB:
