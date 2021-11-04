@@ -26,6 +26,16 @@ class EMCRecipe:
         self.recipe = recipe
         self.shaped = shaped
 
+    def to_json(self) -> dict:
+        return {
+            "recipe": self.recipe,
+            "shaped": self.shaped
+        }
+
+    @classmethod
+    def from_json(cls, json: dict) -> EMCRecipe:
+        return cls(json["recipe"], json["shaped"])
+
 
 class EMCItem:
     def __init__(self, name: str, *, value: int = None, recipe: Recipe = None):
@@ -43,6 +53,13 @@ class EMCItem:
     @property
     def composite(self):
         return self._recipe is not None
+
+    def to_json(self) -> dict:
+        return {"name": self.name, "value": self._raw_value, "recipe": self._recipe.to_json() if self._recipe else None}
+
+    @classmethod
+    def from_json(cls, json: dict):
+        return cls(json["name"], value=json["value"], recipe=EMCRecipe.from_json(json["recipe"]))
 
 
 class EMCSystem:
@@ -84,6 +101,13 @@ class EMCSystem:
             return sum([self.calculate_value(i.name) for i in recipe])
         else:
             return item.value
+
+    def to_json(self):
+        return {"name": self.name, "items": [i.to_json() for i in self._items]}
+
+    @classmethod
+    def from_json(cls, json: dict):
+        return cls(json["name"], items=[EMCItem.from_json(i) for i in json["items"]])
 
 
 class EMCDB:
