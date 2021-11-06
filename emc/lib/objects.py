@@ -92,7 +92,7 @@ class EMCSystem:
             else:
                 return None
 
-    def calculate_value(self, name: str) -> int:
+    def calculate_value(self, name: Union[str, None]) -> int:
         if name is None:
             return 0
         item = self.get_item(name)
